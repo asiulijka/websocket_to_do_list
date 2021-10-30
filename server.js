@@ -13,28 +13,20 @@ const io = socket(server);
 let tasks = [];
 
 io.on('connection', (socket) => {
-  socket.on('message', () => {updateData, tasks});
+  console.log('New connection from ' + socket.id);
+  socket.emit('updateData', {tasks});
+
+  socket.on('addTask', ({id, name}) => {
+    tasks.push({id, name});
+    console.log(tasks);
+    socket.broadcast.emit('addTask', {id: id, name: name}); 
+  });
+  
+  socket.on('removeTask', ({taskId, name}) => {
+    tasks = tasks.filter(({id}) => id !== taskId);
+    socket.broadcast.emit('removeTask', { id: taskId, name: name }); 
+  });
 });
-
-io.on('addTask', () => {
-  tasks.push({taskName, id: socket.id});
-  socket.broadcast.emit('message', { content: 'new task ' +  taskName }); 
-});
-
-io.on('removeTask', () => {
-  const index = tasks.indexOf(taskName);
-  if (index > -1) {
-    tasks.splice(index, 1);
-    socket.broadcast.emit('message', { content: taskName + ' was removed' }); 
-  }
-   
-});
-
-
-
-
-
-
 
 app.use((req, res) => {
   res.status(404).send('404 not found...');
